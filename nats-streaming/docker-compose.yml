@@ -1,0 +1,10 @@
+version: "3"
+services:
+  nats_streaming:
+    image: nats-streaming
+    hostname: queue_nats
+    ports:
+    - 4222:4222
+    - 8222:8222
+
+
