@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - 80:80
+    volumes:
+      - ./storage/wiki/data:/var/www/html/data
+      - ./storage/wiki/lib:/var/www/html/lib
+      - ./storage/wiki/conf:/var/www/html/conf

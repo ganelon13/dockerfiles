@@ -26,4 +26,3 @@ services:
       - "30008:30008"
       - "30009:30009"
     restart: always
-

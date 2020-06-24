@@ -14,4 +14,3 @@ RUN apt-get install -y --allow-unauthenticated \
 CMD ["clickhouse-server", "--config-file=/etc/clickhouse-server/config.xml"]
 
 EXPOSE 9000 8123
- 
