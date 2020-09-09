@@ -1,0 +1,77 @@
+version: '2'
+
+networks:
+  gitea:
+    external: false
+
+services:
+  db:
+    image: postgres:9.6
+    #restart: always
+    environment:
+      - POSTGRES_USER=gitea
+      - POSTGRES_PASSWORD=gitea
+      - POSTGRES_DB=gitea
+    networks:
+      - gitea
+    volumes:
+      - ./storage/postgres:/var/lib/postgresql/data
+
+  gitea:
+    image: gitea/gitea:1.12.4
+    volumes:
+      - ./storage/gitea:/data
+    ports:
+      - "3002:3000"
+      - "222:22"
+    #restart: always
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      #- ROOT_URL=http://gitea:3002
+      - DB_TYPE=postgres
+      - DB_HOST=db:5432
+      - DB_NAME=gitea
+      - DB_USER=gitea
+      - DB_PASSWD=gitea
+      - DISABLE_REGISTRATION=true
+    networks:
+      - gitea
+    depends_on:
+      - db
+
+  drone-server:
+    image: drone/drone:0.8
+    ports:
+      - 8002:8000
+      - 9002:9000
+    volumes:
+      - ./storage/drone:/var/lib/drone/
+    #restart: always
+    depends_on:
+      - gitea
+    environment:
+      - DRONE_OPEN=true
+      - DRONE_HOST=http://drone-server:8000
+      - DRONE_GITEA=true
+      - DRONE_GITEA_URL=http://gitea:3000
+      - DRONE_SECRET=secret
+      - DRONE_NETWORK=gitea
+    networks:
+      - gitea
+
+  drone-agent:
+    image: drone/agent:0.8
+    command: agent
+    #restart: always
+    depends_on:
+      - drone-server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DRONE_SERVER=drone-server:9000
+      - DRONE_SECRET=secret
+    networks:
+      - gitea
